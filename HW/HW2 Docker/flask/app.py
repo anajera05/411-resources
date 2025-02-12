@@ -17,7 +17,7 @@ def hello():
 def repeat():
     response = make_response(
         {
-        'body': request.args.get('input', default='', type=str),
+        'body': request.args.get('input', ''),
         'status': 200
         }
     )
