@@ -13,6 +13,19 @@ configure_logger(logger)
 
 @dataclass
 class Boxer:
+    """
+    A class identify a boxer and their identification (id, name, weight, height, reach, age, and weight_class).
+
+    Attributes:
+        id (int): ID of the boxer
+        name (str): Name of the boxer
+        weight (int): Weight of the boxer
+        height (int):  Height of the boxer
+        reach (float): Reach of the boxer
+        age (int): Age of the boxer
+        weight_class (str): default as none but is calculated based on the Boxer's weight
+
+    """
     id: int
     name: str
     weight: int
@@ -22,11 +35,37 @@ class Boxer:
     weight_class: str = None
 
     def __post_init__(self):
+        """Initializes the Boxer and calculates the weight class based on their weight using get_weight_class
+
+        """
         self.weight_class = get_weight_class(self.weight)  # Automatically assign weight class
 
 
-def create_boxer(name: str, weight: int, height: int, reach: float, age: int) -> None:
+    ##################################################
+    # Create/Remove Boxer
+    ##################################################
 
+
+def create_boxer(name: str, weight: int, height: int, reach: float, age: int) -> None:
+    """Creates a boxer with the inputted args 
+
+    Args:
+        name (str): Name of the boxer
+        weight (int): Weight of the boxer
+        height (int):  Height of the boxer
+        reach (float): Reach of the boxer
+        age (int): Age of the boxer
+
+    Raises:
+        ValueError: 
+            -weight is less than 125,
+            -height is less than or equal to 0,
+            -reach is less than or equal to 0,
+            -or age is younger than 18 or older than 40
+
+            -Boxer with the inputted name already exists 
+
+    """
     if weight < 125:
         raise ValueError(f"Invalid weight: {weight}. Must be at least 125.")
     if height <= 0:
@@ -58,8 +97,25 @@ def create_boxer(name: str, weight: int, height: int, reach: float, age: int) ->
     except sqlite3.Error as e:
         raise e
 
-
 def delete_boxer(boxer_id: int) -> None:
+    """Deletes a boxer from  
+
+    Args:
+        name (str): Name of the boxer
+        weight (int): Weight of the boxer
+        height (int):  Height of the boxer
+        reach (float): Reach of the boxer
+        age (int): Age of the boxer
+
+    Raises:
+        ValueError: 
+            -weight is less than 125,
+            -height is less than or equal to 0,
+            -reach is less than or equal to 0,
+            -or age is younger than 18 or older than 40
+
+            -Boxer with the inputted name already exists 
+    """ 
     try:
         with get_db_connection() as conn:
             cursor = conn.cursor()
@@ -73,6 +129,11 @@ def delete_boxer(boxer_id: int) -> None:
 
     except sqlite3.Error as e:
         raise e
+    
+
+    ##################################################
+    # Retrive Stats on Boxer(s)
+    ##################################################
 
 
 def get_leaderboard(sort_by: str = "wins") -> List[dict[str, Any]]:
@@ -179,6 +240,11 @@ def get_weight_class(weight: int) -> str:
         raise ValueError(f"Invalid weight: {weight}. Weight must be at least 125.")
 
     return weight_class
+
+
+    ##################################################
+    # Change Stats of a Boxer
+    ##################################################
 
 
 def update_boxer_stats(boxer_id: int, result: str) -> None:
