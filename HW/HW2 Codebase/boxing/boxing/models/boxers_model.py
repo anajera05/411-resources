@@ -14,7 +14,7 @@ configure_logger(logger)
 @dataclass
 class Boxer:
     """
-    A class identifies a boxer and their identification (id, name, weight, height, reach, age, and weight_class).
+    A class to create a boxer with associated attributes (id, name, weight, height, reach, age, and weight_class).
 
     Attributes:
         id (int): ID of the boxer
@@ -39,6 +39,7 @@ class Boxer:
 
         """
         self.weight_class = get_weight_class(self.weight)  # Automatically assign weight class
+        logger.info("Successful assigned weight class for Boxer")
 
 
 ##################################################
@@ -63,6 +64,7 @@ def create_boxer(name: str, weight: int, height: int, reach: float, age: int) ->
             -Reach is less than or equal to 0 
             -Age is younger than 18 or older than 40
             -Boxer with the inputted name already exists (names must be unique)
+        sqlite3.Error: If there is any error when attempting to connect to the backend.
 
     """
 
@@ -104,7 +106,6 @@ def create_boxer(name: str, weight: int, height: int, reach: float, age: int) ->
 
             logger.info("Successfully created new Boxer")
             conn.commit()
-            logger.info("Successfully sent boxer to backend.")
 
     except sqlite3.IntegrityError:
         logger.error(f"Boxer with name '{name}' already exists")
@@ -115,13 +116,15 @@ def create_boxer(name: str, weight: int, height: int, reach: float, age: int) ->
         raise e
 
 def delete_boxer(boxer_id: int) -> None:
-    """Deletes a boxer that has been created..
+    """Deletes a boxer that has been created
     
     Args:
         boxer_id (int): ID of the boxer to be removed
   
     Raises:
         ValueError: If Boxer ID is not found
+        sqlite3.Error: If there is any error when attempting to connect to the backend.
+
     """ 
     logger.info(f"Recieved request to delete boxer {boxer_id}")
     try:
@@ -161,6 +164,7 @@ def get_leaderboard(sort_by: str = "wins") -> List[dict[str, Any]]:
 
     Raises:
         ValueError: If sort_by is not "wins" or "wins_pct" 
+        sqlite3.Error: If there is any error when attempting to connect to the backend.
     """     
     logger.info(f"Recieved request to return leaderboard of Boxers based on {sort_by}")
     
@@ -224,6 +228,7 @@ def get_boxer_by_id(boxer_id: int) -> Boxer:
 
     Raises: 
         ValueError: If Boxer ID is not found
+        sqlite3.Error: If there is any error when attempting to connect to the backend.
     """ 
     logger.info(f"Retriving Boxer {boxer_id}")
 
@@ -264,6 +269,7 @@ def get_boxer_by_name(boxer_name: str) -> Boxer:
 
     Raises: 
         ValueError: If Boxer name is not found
+        sqlite3.Error: If there is any error when attempting to connect to the backend.
     """ 
     logger.info(f"Retriving Boxer {boxer_name}")
     try:
@@ -344,6 +350,7 @@ def update_boxer_stats(boxer_id: int, result: str) -> None:
         ValueError: If
             -result is not "win" or "lose"
             -the inputted ID is not found
+        sqlite3.Error: If there is any error when attempting to connect to the backend.
     """ 
     logger.info(f"Recieved request to update Boxer {boxer_id} stats to reflect a {result}")
 
