@@ -5,6 +5,12 @@ from flask import current_app, has_request_context
 
 
 def configure_logger(logger):
+    """
+    Configures the logger for debugging in Flask.
+
+    Args:
+        logger (logging.Logger): The logger object that is being configured.
+    """
     logger.setLevel(logging.DEBUG)
 
     # Create a console handler that logs to stderr
