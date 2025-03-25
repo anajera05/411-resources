@@ -18,7 +18,7 @@ def get_random() -> float:
     Produces a random number from 0 to 1 through an API call.
 
     Returns:
-        random_number (float): The resulting random number produced.
+        float: The resulting random number produced.
 
     Raises:
         ValueError: The response from the provided url was invalid.

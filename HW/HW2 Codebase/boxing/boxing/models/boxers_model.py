@@ -14,7 +14,7 @@ configure_logger(logger)
 @dataclass
 class Boxer:
     """
-    A class identify a boxer and their identification (id, name, weight, height, reach, age, and weight_class).
+    A class identifies a boxer and their identification (id, name, weight, height, reach, age, and weight_class).
 
     Attributes:
         id (int): ID of the boxer
@@ -104,6 +104,7 @@ def create_boxer(name: str, weight: int, height: int, reach: float, age: int) ->
 
             logger.info("Successfully created new Boxer")
             conn.commit()
+            logger.info("Successfully sent boxer to backend.")
 
     except sqlite3.IntegrityError:
         logger.error(f"Boxer with name '{name}' already exists")
@@ -114,7 +115,7 @@ def create_boxer(name: str, weight: int, height: int, reach: float, age: int) ->
         raise e
 
 def delete_boxer(boxer_id: int) -> None:
-    """Deletes a boxer that has been created
+    """Deletes a boxer that has been created..
     
     Args:
         boxer_id (int): ID of the boxer to be removed

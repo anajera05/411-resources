@@ -44,6 +44,7 @@ def check_table_exists(tablename: str):
     
     Raises:
         Exception: If the table doesn't exist or there was an error when checking.
+        sqlite3.Error: If there is an error when checking the table.
     """
     try:
         logger.info("Attempting to connect to the database.")
