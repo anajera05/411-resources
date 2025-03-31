@@ -5,12 +5,12 @@ import pytest
 from boxing.models.boxers_model import Boxer
 
 @pytest.fixture()
-def boxer_model():
+def sample_boxer1():
     """Fixture to provide a new Boxer instance for each test."""
     return Boxer(id=1, name="John Doe", weight=150, height=70, reach=74.5, age=30)
 
 @pytest.fixture()
-def boxer_model2():
+def sample_boxer2():
     """Fixture to provide a new Boxer instance for each test."""
     return Boxer(id=1, name="Mark Scout", weight = 200, height=75, reach=78.3, age =27)
 
