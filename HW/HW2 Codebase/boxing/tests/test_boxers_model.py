@@ -1,18 +1,49 @@
-from dataclasses import asdict
+from contextlib import contextmanager
+import re
+import sqlite3
 
 import pytest
 
-from boxing.models.boxers_model import Boxer
+from boxing.models.boxers_model import (
+    Boxer,
+    create_boxer,
+    delete_boxer,
+    get_leaderboard,
+    get_boxer_by_id,
+    get_boxer_by_name,
+    get_weight_class,
+    update_boxer_stats
+)
+######################################################
+#
+#    Fixtures
+#
+######################################################
 
-@pytest.fixture()
-def sample_boxer1():
-    """Fixture to provide a new Boxer instance for each test."""
-    return Boxer(id=1, name="John Doe", weight=150, height=70, reach=74.5, age=30)
+# Mocking the database connection for tests
+@pytest.fixture
+def mock_cursor(mocker):
+    mock_conn = mocker.Mock()
+    mock_cursor = mocker.Mock()
 
-@pytest.fixture()
-def sample_boxer2():
-    """Fixture to provide a new Boxer instance for each test."""
-    return Boxer(id=1, name="Mark Scout", weight = 200, height=75, reach=78.3, age =27)
+    # Mock the connection's cursor
+    mock_conn.cursor.return_value = mock_cursor
+    mock_cursor.fetchone.return_value = None  # Default return for queries
+    mock_cursor.fetchall.return_value = []
+    mock_cursor.commit.return_value = None
+
+    # Mock the get_db_connection context manager from sql_utils
+    @contextmanager
+    def mock_get_db_connection():
+        yield mock_conn  # Yield the mocked connection object
+
+    mocker.patch("boxing.models.boxers_model.get_db_connection", mock_get_db_connection)
+
+    return mock_cursor  # Return the mock cursor so we can set expectations per test
+
+
+def normalize_whitespace(sql_query: str) -> str:
+    return re.sub(r'\s+', ' ', sql_query).strip()
 
 
 ##################################################
@@ -20,20 +51,34 @@ def sample_boxer2():
 ##################################################
 
 
-def test_create_boxer():
-    """Test creating a Boxer
+def test_create_boxer(mock_cursor):
+    """Test creating a new boxer.
 
     """
-    Boxer().create_boxer("John Doe", 120, 70, 74.5, 30)
-    assert boxer_model.id == 1
+    create_boxer(name="Boxer 1", weight=150, height=90, reach = 20, age = 30)
+
+    expected_query = normalize_whitespace("""
+        INSERT INTO boxers (name, weight, height, reach, age)
+        VALUES (?, ?, ?, ?, ?)
+    """)
+    actual_query = normalize_whitespace(mock_cursor.execute.call_args[0][0])
+
+    assert actual_query == expected_query, "The SQL query did not match the expected structure."
+
+    # Extract the arguments used in the SQL call (second element of call_args)
+    actual_arguments = mock_cursor.execute.call_args[0][1]
+    expected_arguments = ("Boxer 1", 150, 90, 20, 30)
+
+    assert actual_arguments == expected_arguments, f"The SQL query arguments did not match. Expected {expected_arguments}, got {actual_arguments}."
 
 
 def test_create_boxer_invalid_weight():
-    """Test error creating a Boxer with a weight below 125
+    """Test error when trying to create a boxer with an invalid weight (<125)
 
     """
-    with pytest.raises(ValueError, match="Invalid weight: 120. Must be at least 125."):
-        Boxer().create_boxer(name="John Doe", weight=120, height=70, reach=74.5, age=30)
+    boxer_weight = 110
+    with pytest.raises(ValueError, match=f"Invalid weight: {boxer_weight}. Must be at least 125."):
+        create_boxer(name="Boxer 1", weight=boxer_weight, height=90, reach = 20, age = 30)
 
 
 def test_create_boxer_invalid_height():
@@ -105,12 +150,17 @@ def test_delete_boxer_not_found():
 ##################################################
 
 
-def test_get_leaderboard_wins(boxer_model, boxer_model2):
+def test_get_leaderboard_wins(mock_cursor):
     """Test getting leaderboard by wins (default sort)
 
     """
-    boxer_model.update_boxer_stats()
+    mock_cursor.fetchall.return_value = [
+        ("Boxer 1", 150, 90, 20, 30),
+        (2, "Artist B", "Song B", 2021, "Pop", 180, 20, False),
+        (3, "Artist C", "Song C", 2022, "Jazz", 200, 5, False)
+    ]
     assert True
+
 
 def test_get_leaderboard_pct(sort_by):
     """Test getting leaderboard by pct
