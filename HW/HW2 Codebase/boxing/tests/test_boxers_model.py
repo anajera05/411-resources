@@ -7,12 +7,12 @@ from boxing.models.boxers_model import Boxer
 @pytest.fixture()
 def boxer_model():
     """Fixture to provide a new Boxer instance for each test."""
-    return Boxer().create_boxer("John Doe", 150, 70, 74.5, 30)
+    return Boxer(id=1, name="John Doe", weight=150, height=70, reach=74.5, age=30)
 
 @pytest.fixture()
 def boxer_model2():
     """Fixture to provide a new Boxer instance for each test."""
-    return Boxer().create_boxer("Mark Scout", 200, 75, 78.3, 27)
+    return Boxer(id=1, name="Mark Scout", weight = 200, height=75, reach=78.3, age =27)
 
 
 ##################################################
