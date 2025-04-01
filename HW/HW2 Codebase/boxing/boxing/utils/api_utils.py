@@ -14,8 +14,7 @@ RANDOM_ORG_URL = os.getenv("RANDOM_ORG_URL",
 
 
 def get_random() -> float:
-    """
-    Produces a random number from 0 to 1 through an API call.
+    """Produces a random number from 0 to 1 through an API call.
 
     Returns:
         float: The resulting random number produced.
@@ -23,6 +22,7 @@ def get_random() -> float:
     Raises:
         ValueError: The response from the provided url was invalid.
         RuntimeError: The request to the provided url timed out or failed.
+        
     """
     try:
         logger.info("Making a request to random.org for random number.")

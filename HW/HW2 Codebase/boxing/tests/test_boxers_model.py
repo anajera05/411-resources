@@ -171,25 +171,98 @@ def test_get_leaderboard_wins(mock_cursor):
 
     """
     mock_cursor.fetchall.return_value = [
-        ("Boxer 1", 150, 90, 20, 30),
-        (2, "Artist B", "Song B", 2021, "Pop", 180, 20, False),
-        (3, "Artist C", "Song C", 2022, "Jazz", 200, 5, False)
+        (2, "Boxer 2", 190, 65, 15, 25, 5, 4, .8),
+        (1, "Boxer 1", 130, 60, 10, 30, 5, 3, .6),
+        (3, "Boxer 3", 195, 62, 13, 35, 5, 2, .4)
     ]
-    assert True
+
+    leaderboard = get_leaderboard()
+
+    expected_result = [
+        {"id": 2, "name": "Boxer 2", "weight": 190, "height": 65, "reach": 15, "age": 25, "weight_class": 'MIDDLEWEIGHT', "fights":5, "wins":4, "win_pct":80 },
+        {"id": 1, "name": "Boxer 1", "weight": 130, "height": 60, "reach": 10, "age": 30, "weight_class": 'FEATHERWEIGHT', "fights":5, "wins":3, "win_pct":60},
+        {"id": 3, "name": "Boxer 3", "weight": 195, "height": 62, "reach": 13, "age": 35, "weight_class": 'MIDDLEWEIGHT', "fights":5, "wins":2, "win_pct":40}
+    ]
+
+    assert leaderboard  == expected_result, f"Expected {expected_result}, but got {leaderboard}"
+
+    expected_query = normalize_whitespace( """
+        SELECT id, name, weight, height, reach, age, fights, wins,
+               (wins * 1.0 / fights) AS win_pct
+        FROM boxers
+        WHERE fights > 0
+        ORDER BY wins DESC
+    """)
+    actual_query = normalize_whitespace(mock_cursor.execute.call_args[0][0])
+
+    assert actual_query == expected_query, "The SQL query did not match the expected structure."
 
 
 def test_get_leaderboard_pct(mock_cursor):
-    """Test getting leaderboard by pct
+    """Test getting leaderboard by win percent
 
     """
-    assert True
+    mock_cursor.fetchall.return_value = [
+        (3, "Boxer 3", 195, 62, 13, 35, 5, 4, .8),
+        (1, "Boxer 1", 130, 60, 10, 30, 4, 2, .5),
+        (2, "Boxer 2", 190, 65, 15, 25, 5, 2, .4)      
+        
+    ]
+
+    leaderboard = get_leaderboard(sort_by="win_pct")
+
+    expected_result = [
+        {"id": 3, "name": "Boxer 3", "weight": 195, "height": 62, "reach": 13, "age": 35, "weight_class": 'MIDDLEWEIGHT', "fights":5, "wins":4, "win_pct":80},
+        {"id": 1, "name": "Boxer 1", "weight": 130, "height": 60, "reach": 10, "age": 30, "weight_class": 'FEATHERWEIGHT', "fights":4, "wins":2, "win_pct":50},
+        {"id": 2, "name": "Boxer 2", "weight": 190, "height": 65, "reach": 15, "age": 25, "weight_class": 'MIDDLEWEIGHT', "fights":5, "wins":2, "win_pct":40}
+    ]
+
+    assert leaderboard  == expected_result, f"Expected {expected_result}, but got {leaderboard}"
+
+    expected_query = normalize_whitespace( """
+        SELECT id, name, weight, height, reach, age, fights, wins,
+               (wins * 1.0 / fights) AS win_pct
+        FROM boxers
+        WHERE fights > 0
+        ORDER BY win_pct DESC
+    """)
+    actual_query = normalize_whitespace(mock_cursor.execute.call_args[0][0])
+
+    assert actual_query == expected_query, "The SQL query did not match the expected structure."
 
 
-def test_get_leaderboard_none(mock_cursor):
+def test_get_leaderboard_none(mock_cursor, caplog):
     """Test error input not wins or pct
 
     """
-    assert True
+    mock_cursor.fetchall.return_value = []
+
+    result = get_leaderboard()
+
+    assert result == [], f"Expected empty list, but got {result}"
+
+    expected_query = normalize_whitespace( """
+            SELECT id, name, weight, height, reach, age, fights, wins,
+                (wins * 1.0 / fights) AS win_pct
+            FROM boxers
+            WHERE fights > 0
+            ORDER BY wins DESC
+        """)    
+        
+    actual_query = normalize_whitespace(mock_cursor.execute.call_args[0][0])
+
+    assert actual_query == expected_query, "The SQL query did not match the expected structure."
+
+def test_get_leaderboard_invalid_sort_parameter(mock_cursor):
+    """Test error if wins or win_pct is not passed as an argument into the get_leaderboard method.
+
+    """
+    mock_cursor.fetchone.return_value = None
+    sort_test = "invalid"
+    with pytest.raises(ValueError, match=f"Invalid sort_by parameter: {sort_test}"):
+        get_leaderboard(sort_by=sort_test)
+
+
 
 def test_get_boxer_by_id(mock_cursor):
     """Test getting a song by id.
