@@ -181,7 +181,7 @@ delete_boxer 1
 get_boxer_by_id 2
 get_boxer_by_name "Boxer1"
 
-# Rind functions
+# Ring functions
 bout
 clear_boxers
 
@@ -189,6 +189,7 @@ enter_ring
 get_boxers
 
 # Leaderboard
-get_leaderboard
+get_leaderboard "win"
+get_leaderboard "loss"
 
 echo "All tests passed successfully!"
