@@ -214,7 +214,7 @@ get_leaderboard() {
 }
 
 # Initialize the database
-sqlite3 db/ring.db < sql/init_db.sql
+sqlite3 /app/db/boxing.db < sql/init_db.sql
 
 # Health checks
 check_health
