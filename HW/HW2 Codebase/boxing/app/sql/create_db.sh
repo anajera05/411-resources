@@ -1,4 +1,7 @@
 #!/bin/bash
+if [ -f .env ]; then
+    export $(cat .env | xargs)
+fi
 
 # Check if the database file already exists
 if [ -f "$DB_PATH" ]; then
